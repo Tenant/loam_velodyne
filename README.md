@@ -5,34 +5,45 @@ Sample map built from [nsh_indoor_outdoor.bag](http://www.frc.ri.cmu.edu/~jizhan
 
 All sources were taken from [ROS documentation](http://docs.ros.org/indigo/api/loam_velodyne/html/files.html)
 
-Ask questions [here](https://github.com/laboshinl/loam_velodyne/issues/3).
 
-How to build with catkin:
+
+**How to build with catkin**
+
+Build `loam_velodyne`:
 
 ```
 $ cd ~/catkin_ws/src/
-$ git clone https://github.com/laboshinl/loam_velodyne.git
+$ git clone git@github.com:Tenant/loam_velodyne.git
 $ cd ~/catkin_ws
 $ catkin_make -DCMAKE_BUILD_TYPE=Release 
 $ source ~/catkin_ws/devel/setup.bash
 ```
 
-Running:
-```
-roslaunch loam_velodyne loam_velodyne.launch
+Build `velodyne`:
+
+```basj
+$ cd ~/catkin_ws/src/
+$ git clone git@github.com:Tenant/velodyne.git
+$ cd ~/catkin_ws
+$ catkin_make --only-pkg-with-deps velodyne -DCMAKE_BUILD_TYPE=Release
+$ source ~/catkin_ws/devel/setup.sh
 ```
 
-In second terminal play sample velodyne data from [VLP16 rosbag](https://db.tt/t2r39mjZ):
+Build `fixed_tf_broadcaster`:
+
 ```
-rosbag play ~/Downloads/velodyne.bag 
+$ cd ~/catkin_ws/src/
+$ git clone git@github.com:Tenant/fixed_tf_broadcaster.git
+$ cd ~/catkin_ws
+$ source ~/catkin_ws/devel/setup.sh
 ```
 
-Or read from velodyne [VLP16 sample pcap](https://midas3.kitware.com/midas/folder/12979):
+
+
+**Running**:
+
 ```
-roslaunch velodyne_pointcloud VLP16_points.launch pcap:="/home/laboshinl/Downloads/velodyne.pcap"
+roslaunch fixed_tf_broadcaster startall.launch
 ```
 
----
-[Quantifying Aerial LiDAR Accuracy of LOAM for Civil Engineering Applications.](https://ceen.et.byu.edu/sites/default/files/snrprojects/wolfe_derek.pdf) Derek Anthony Wolfe
 
-[ROS & Loam_velodyne](https://ishiguro440.wordpress.com/2016/04/05/%E5%82%99%E5%BF%98%E9%8C%B2%E3%80%80ros-loam_velodyne/) 
