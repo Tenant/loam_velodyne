@@ -297,7 +297,7 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
    pointOnYAxis.z = 0.0;
    pointAssociateToMap(pointOnYAxis, pointOnYAxis);
 
-   auto const CUBE_SIZE = 50.0;
+   auto const CUBE_SIZE = 200.0;
    auto const CUBE_HALF = CUBE_SIZE / 2;
 
    int centerCubeI = int((_transformTobeMapped.pos.x() + CUBE_HALF) / CUBE_SIZE) + _laserCloudCenWidth;
@@ -435,9 +435,9 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
                 k >= 0 && k < _laserCloudDepth)
             {
 
-               float centerX = 50.0f * (i - _laserCloudCenWidth);
-               float centerY = 50.0f * (j - _laserCloudCenHeight);
-               float centerZ = 50.0f * (k - _laserCloudCenDepth);
+               float centerX = 200.0f * (i - _laserCloudCenWidth);
+               float centerY = 200.0f * (j - _laserCloudCenHeight);
+               float centerZ = 200.0f * (k - _laserCloudCenDepth);
 
                pcl::PointXYZI transform_pos = (pcl::PointXYZI) _transformTobeMapped.pos;
 
@@ -449,9 +449,9 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
                      for (int kk = -1; kk <= 1; kk += 2)
                      {
                         pcl::PointXYZI corner;
-                        corner.x = centerX + 25.0f * ii;
-                        corner.y = centerY + 25.0f * jj;
-                        corner.z = centerZ + 25.0f * kk;
+                        corner.x = centerX + 100.0f * ii;
+                        corner.y = centerY + 100.0f * jj;
+                        corner.z = centerZ + 100.0f * kk;
 
                         float squaredSide1 = calcSquaredDiff(transform_pos, corner);
                         float squaredSide2 = calcSquaredDiff(pointOnYAxis, corner);
