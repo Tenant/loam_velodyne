@@ -182,6 +182,9 @@ void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserC
     point.x = laserCloudIn[i].y;
     point.y = laserCloudIn[i].z;
     point.z = laserCloudIn[i].x;
+    //point.x = laserCloudIn[i].z;
+    //point.y = laserCloudIn[i].y;
+    //point.z = -1.0 * laserCloudIn[i].x;
 
     // skip NaN and INF valued points
     if (!pcl_isfinite(point.x) ||
