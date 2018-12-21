@@ -144,6 +144,7 @@ namespace loam
     _pubLaserOdometry = node.advertise<nav_msgs::Odometry>("/laser_odom_to_init", 5);
 
     // subscribe to scan registration topics
+    /* LaserOdometry subsribe to these four topics from ScanRegistration */
     _subCornerPointsSharp = node.subscribe<sensor_msgs::PointCloud2>
       ("/laser_cloud_sharp", 2, &LaserOdometry::laserCloudSharpHandler, this);
 

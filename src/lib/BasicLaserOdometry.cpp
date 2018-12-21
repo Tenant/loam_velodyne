@@ -237,9 +237,19 @@ void BasicLaserOdometry::process()
       _pointSearchSurfInd2.resize(surfPointsFlatNum);
       _pointSearchSurfInd3.resize(surfPointsFlatNum);
 
+      printf("Total iterations: %d\n",_maxIterations);
+
       for (size_t iterCount = 0; iterCount < _maxIterations; iterCount++)
       {
+         printf("Iteration %d:\n",iterCount);
+         printf("Number of Corner Points: %d\n",cornerPointsSharpNum);
+         printf("Number of Planar Points: %d\n",surfPointsFlatNum);
          pcl::PointXYZI pointSel, pointProj, tripod1, tripod2, tripod3;
+         char filename[50];
+         sprintf(filename, "/home/sukie/Desktop/data/log-%ld-%d.txt",_frameCount,iterCount);
+         FILE *fp;
+         fp=fopen(filename,"w");
+         
          _laserCloudOri->clear();
          _coeffSel->clear();
 
@@ -305,6 +315,10 @@ void BasicLaserOdometry::process()
             {
                tripod1 = _lastCornerCloud->points[_pointSearchCornerInd1[i]];
                tripod2 = _lastCornerCloud->points[_pointSearchCornerInd2[i]];
+
+               // Debug Display
+               fprintf(fp,"Corner Point1: (%.3f, %.3f, %.3f, %.6f)\n",tripod1.x,tripod1.y,tripod1.z,tripod1.intensity);
+               fprintf(fp,"Corner Point2: (%.3f, %.3f, %.3f, %.6f)\n",tripod2.x,tripod2.y,tripod2.z,tripod2.intensity);
 
                float x0 = pointSel.x;
                float y0 = pointSel.y;
@@ -439,6 +453,11 @@ void BasicLaserOdometry::process()
                tripod1 = _lastSurfaceCloud->points[_pointSearchSurfInd1[i]];
                tripod2 = _lastSurfaceCloud->points[_pointSearchSurfInd2[i]];
                tripod3 = _lastSurfaceCloud->points[_pointSearchSurfInd3[i]];
+
+               // Debug Display
+               fprintf(fp,"Planar Point1: (%.3f, %.3f, %.3f, %.6f)\n",tripod1.x,tripod1.y,tripod1.z,tripod1.intensity);
+               fprintf(fp,"Planar Point2: (%.3f, %.3f, %.3f, %.6f)\n",tripod2.x,tripod2.y,tripod2.z,tripod2.intensity);
+               fprintf(fp,"Planar Point3: (%.3f, %.3f, %.3f, %.6f)\n",tripod3.x,tripod3.y,tripod3.z,tripod3.intensity);
 
                float pa = (tripod2.y - tripod1.y) * (tripod3.z - tripod1.z)
                   - (tripod3.y - tripod1.y) * (tripod2.z - tripod1.z);
@@ -610,7 +629,8 @@ void BasicLaserOdometry::process()
          if (!pcl_isfinite(_transform.pos.x())) _transform.pos.x() = 0.0;
          if (!pcl_isfinite(_transform.pos.y())) _transform.pos.y() = 0.0;
          if (!pcl_isfinite(_transform.pos.z())) _transform.pos.z() = 0.0;
-
+         
+         // Delta_R + Delta_T
          float deltaR = sqrt(pow(rad2deg(matX(0, 0)), 2) +
                              pow(rad2deg(matX(1, 0)), 2) +
                              pow(rad2deg(matX(2, 0)), 2));
@@ -619,8 +639,12 @@ void BasicLaserOdometry::process()
                              pow(matX(5, 0) * 100, 2));
 
          if (deltaR < _deltaRAbort && deltaT < _deltaTAbort)
+         {
+            fclose(fp);
             break;
-      }
+         }
+         fclose(fp);
+      } // end of iterations
    }
 
    Angle rx, ry, rz;

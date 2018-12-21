@@ -3,6 +3,7 @@
 #include "nanoflann_pcl.h"
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <stdio.h>
 
 namespace loam
 {
