@@ -41,6 +41,19 @@ void BasicScanRegistration::processScanlines(const Time& scanTime, std::vector<p
     _scanIndices.push_back(range);
   }
 
+// ========== MODIFICATION ========== //
+  printf("PCL size =  %d\n",_laserCloud.size());
+  static long long _cur_frame_id = 1;
+  FILE *fp;
+  char filename[50];
+  sprintf(filename, "/home/sukie/Desktop/data/pcl-%ld.txt",_cur_frame_id++);
+  fp=fopen(filename,"w");
+  for(int _idx = 0; _idx < _laserCloud.size(); _idx++){
+    fprintf(fp, "%.6f, %.6f, %.6f, %.6f\n",_laserCloud[_idx].x, _laserCloud[_idx].y, _laserCloud[_idx].z, _laserCloud[_idx].intensity);
+  }
+  fclose(fp);
+  // ========== MODIFICATION ========== //
+
   extractFeatures();
   updateIMUTransform();
 }
@@ -360,6 +373,18 @@ void BasicScanRegistration::setScanBuffersFor(const size_t& startIdx, const size
       _scanNeighborPicked[i - startIdx] = 1;
     }
   }
+  // Ddbug Output
+  /*
+  printf("%.6f\n",toSec(_scanTime));
+  char filename[50];
+  sprintf(filename, "/home/sukie/Desktop/data/pcl-%ld.txt",1);
+  FILE *fp;
+  fp=fopen(filename,"w");
+  for(int i=startIdx;i<endIdx;i++){
+    fprintf(fp,"%.3f, %.3f, %.3f, %.6f\n",_laserCloud[i].x,_laserCloud[i].y,_laserCloud[i].z,_laserCloud[i].intensity);
+  }
+  fclose(fp);
+  */
 }
 
 

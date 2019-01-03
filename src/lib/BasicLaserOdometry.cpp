@@ -237,19 +237,36 @@ void BasicLaserOdometry::process()
       _pointSearchSurfInd2.resize(surfPointsFlatNum);
       _pointSearchSurfInd3.resize(surfPointsFlatNum);
 
-      printf("Total iterations: %d\n",_maxIterations);
+      int mode_debug = 0; // 0-record points, 1-record delta, 2-record ld2, pd2, ls, ps, 3-don't know
+      FILE *fp;
+      FILE *fp_ld2, *fp_pd2, *fp_ls, *fp_ps;
+      char filename[50];
+      if(mode_debug==1) {
+         sprintf(filename, "/home/sukie/Desktop/data/delta-%ld.txt",_frameCount);
+         fp=fopen(filename,"w");
+       }
 
       for (size_t iterCount = 0; iterCount < _maxIterations; iterCount++)
       {
-         printf("Iteration %d:\n",iterCount);
-         printf("Number of Corner Points: %d\n",cornerPointsSharpNum);
-         printf("Number of Planar Points: %d\n",surfPointsFlatNum);
+         //printf("Iteration %d:\n",iterCount);
+         //printf("Number of Corner Points: %d\n",cornerPointsSharpNum);
+         //printf("Number of Planar Points: %d\n",surfPointsFlatNum);
          pcl::PointXYZI pointSel, pointProj, tripod1, tripod2, tripod3;
-         char filename[50];
-         sprintf(filename, "/home/sukie/Desktop/data/log-%ld-%d.txt",_frameCount,iterCount);
-         FILE *fp;
-         fp=fopen(filename,"w");
-         
+         if(mode_debug==0){
+            sprintf(filename, "/home/sukie/Desktop/data/log-%ld-%d.txt",_frameCount,iterCount);
+            fp=fopen(filename,"w");
+         }
+         if(mode_debug==2){
+            sprintf(filename, "/home/sukie/Desktop/data/ld2-%ld-%d.txt",_frameCount,iterCount);
+            fp_ld2=fopen(filename,"w");
+            sprintf(filename, "/home/sukie/Desktop/data/pd2-%ld-%d.txt",_frameCount,iterCount);
+            fp_pd2=fopen(filename,"w");
+            sprintf(filename, "/home/sukie/Desktop/data/ls-%ld-%d.txt",_frameCount,iterCount);
+            fp_ls=fopen(filename,"w");
+            sprintf(filename, "/home/sukie/Desktop/data/ps-%ld-%d.txt",_frameCount,iterCount);
+            fp_ps=fopen(filename,"w");
+         }
+                 
          _laserCloudOri->clear();
          _coeffSel->clear();
 
@@ -317,8 +334,11 @@ void BasicLaserOdometry::process()
                tripod2 = _lastCornerCloud->points[_pointSearchCornerInd2[i]];
 
                // Debug Display
-               fprintf(fp,"Corner Point1: (%.3f, %.3f, %.3f, %.6f)\n",tripod1.x,tripod1.y,tripod1.z,tripod1.intensity);
-               fprintf(fp,"Corner Point2: (%.3f, %.3f, %.3f, %.6f)\n",tripod2.x,tripod2.y,tripod2.z,tripod2.intensity);
+               if(mode_debug == 0){
+                  fprintf(fp,"Origin, %.3f, %.3f, %.3f, %.6f, ", pointSel.x, pointSel.y, pointSel.z, pointSel.intensity);
+                  fprintf(fp,"Corner1, %.3f, %.3f, %.3f, %.6f, ",tripod1.x,tripod1.y,tripod1.z,tripod1.intensity);
+                  fprintf(fp,"Corner2, %.3f, %.3f, %.3f, %.6f\n",tripod2.x,tripod2.y,tripod2.z,tripod2.intensity);
+               }
 
                float x0 = pointSel.x;
                float y0 = pointSel.y;
@@ -350,6 +370,10 @@ void BasicLaserOdometry::process()
 
                float ld2 = a012 / l12; // Eq. (2)
 
+               if(mode_debug == 2){
+                  fprintf(fp_ld2, "%.6f\n",ld2);
+               }
+
                // TODO: Why writing to a variable that's never read?
                pointProj = pointSel;
                pointProj.x -= la * ld2;
@@ -360,6 +384,10 @@ void BasicLaserOdometry::process()
                if (iterCount >= 5)
                {
                   s = 1 - 1.8f * fabs(ld2);
+               }
+
+               if(mode_debug == 2){
+                  fprintf(fp_ls, "%.6f\n",s); // distance points to line
                }
 
                coeff.x = s * la;
@@ -455,9 +483,12 @@ void BasicLaserOdometry::process()
                tripod3 = _lastSurfaceCloud->points[_pointSearchSurfInd3[i]];
 
                // Debug Display
-               fprintf(fp,"Planar Point1: (%.3f, %.3f, %.3f, %.6f)\n",tripod1.x,tripod1.y,tripod1.z,tripod1.intensity);
-               fprintf(fp,"Planar Point2: (%.3f, %.3f, %.3f, %.6f)\n",tripod2.x,tripod2.y,tripod2.z,tripod2.intensity);
-               fprintf(fp,"Planar Point3: (%.3f, %.3f, %.3f, %.6f)\n",tripod3.x,tripod3.y,tripod3.z,tripod3.intensity);
+               if(mode_debug == 0){
+                  fprintf(fp,"Origin, %.3f, %.3f, %.3f, %.6f, ", pointSel.x, pointSel.y, pointSel.z, pointSel.intensity);
+                  fprintf(fp,"Planar1, %.3f, %.3f, %.3f, %.6f, ",tripod1.x,tripod1.y,tripod1.z,tripod1.intensity);
+                  fprintf(fp,"Planar2, %.3f, %.3f, %.3f, %.6f, ",tripod2.x,tripod2.y,tripod2.z,tripod2.intensity);
+                  fprintf(fp,"Planar3, %.3f, %.3f, %.3f, %.6f\n",tripod3.x,tripod3.y,tripod3.z,tripod3.intensity);
+               }
 
                float pa = (tripod2.y - tripod1.y) * (tripod3.z - tripod1.z)
                   - (tripod3.y - tripod1.y) * (tripod2.z - tripod1.z);
@@ -475,6 +506,10 @@ void BasicLaserOdometry::process()
 
                float pd2 = pa * pointSel.x + pb * pointSel.y + pc * pointSel.z + pd; //Eq. (3)??
 
+               if(mode_debug == 2){
+                  fprintf(fp_pd2, "%.6f\n",pd2); //j distance points to surface
+               }
+
                // TODO: Why writing to a variable that's never read? Maybe it should be used afterwards?
                pointProj = pointSel;
                pointProj.x -= pa * pd2;
@@ -485,6 +520,10 @@ void BasicLaserOdometry::process()
                if (iterCount >= 5)
                {
                   s = 1 - 1.8f * fabs(pd2) / sqrt(calcPointDistance(pointSel));
+               }
+
+               if(mode_debug == 2){
+                  fprintf(fp_ps, "%.6f\n",s);
                }
 
                coeff.x = s * pa;
@@ -616,11 +655,17 @@ void BasicLaserOdometry::process()
          }
 
          _transform.rot_x = _transform.rot_x.rad() + matX(0, 0);
+         //_transform.rot_x = -0.0306;
          _transform.rot_y = _transform.rot_y.rad() + matX(1, 0);
+         //_transform.rot_y = -4.5749;
          _transform.rot_z = _transform.rot_z.rad() + matX(2, 0);
+         //_transform.rot_z = -0.0310;
          _transform.pos.x() += matX(3, 0);
+         //_transform.pos.x() = 0.0; //-92.5619;
          _transform.pos.y() += matX(4, 0);
+         //_transform.pos.y() = -83.8084;
          _transform.pos.z() += matX(5, 0);
+         //_transform.pos.z() = 0.0; //-252.5517;
 
          if (!pcl_isfinite(_transform.rot_x.rad())) _transform.rot_x = Angle();
          if (!pcl_isfinite(_transform.rot_y.rad())) _transform.rot_y = Angle();
@@ -637,17 +682,37 @@ void BasicLaserOdometry::process()
          float deltaT = sqrt(pow(matX(3, 0) * 100, 2) +
                              pow(matX(4, 0) * 100, 2) +
                              pow(matX(5, 0) * 100, 2));
+         
+         if(mode_debug == 1){
+            fprintf(fp,"%.6f, %.6f\n",deltaR, deltaT);
+         }
+         //printf("DetaRabort: %.6f, DeltaTabort: %.6f\n",_deltaRAbort,_deltaTAbort);
 
          if (deltaR < _deltaRAbort && deltaT < _deltaTAbort)
          {
-            fclose(fp);
+            if(mode_debug == 0) fclose(fp);
+            if(mode_debug == 2) {
+               fclose(fp_ld2);
+               fclose(fp_pd2);
+               fclose(fp_ls);
+               fclose(fp_ps);
+            }
             break;
          }
-         fclose(fp);
+        if(mode_debug == 0) fclose(fp);
+        if(mode_debug == 2) {
+           fclose(fp_ld2);
+           fclose(fp_pd2);
+           fclose(fp_ls);
+           fclose(fp_ps);
+         }
       } // end of iterations
+      if(mode_debug == 1) fclose(fp);
    }
 
    Angle rx, ry, rz;
+   //printf("Validation: %.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n",_transformSum.rot_x,_transformSum.rot_y,_transformSum.rot_z,_transformSum.pos.x(),_transformSum.pos.y(),_transformSum.pos.z());
+   printf("Validation: %.6f\n",_transformSum.pos.x());
    accumulateRotation(_transformSum.rot_x,
                       _transformSum.rot_y,
                       _transformSum.rot_z,
@@ -666,6 +731,13 @@ void BasicLaserOdometry::process()
                      _imuPitchStart, _imuYawStart, _imuRollStart,
                      _imuPitchEnd, _imuYawEnd, _imuRollEnd,
                      rx, ry, rz);
+
+   /* rx, ry, rz, trans */
+   //Vector3 new_trans(trans.x(),-83.8084,trans.z());
+   Vector3 new_trans(-92.5919,-83.8084,-252.5517);
+   Angle gt_rx(float(0.0306));
+   Angle gt_ry(float(-4.5759));
+   Angle gt_rz(float(-0.0310));
 
    _transformSum.rot_x = rx;
    _transformSum.rot_y = ry;

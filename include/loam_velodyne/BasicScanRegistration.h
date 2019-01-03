@@ -10,6 +10,8 @@
 #include "CircularBuffer.h"
 #include "time_utils.h"
 
+#include <stdio.h>
+
 namespace loam
 {
 
