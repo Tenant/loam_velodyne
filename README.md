@@ -39,8 +39,20 @@ $ source ~/catkin_ws/devel/setup.sh
 
 **Running**:
 
+The path of data is defined in start_*.launch
+
 ```
-roslaunch fixed_tf_broadcaster startall.launch
+roslaunch fixed_tf_broadcaster start_201.launch
+```
+
+
+```
+roslaunch fixed_tf_broadcaster start_campus1.launch
+```
+
+
+```
+roslaunch fixed_tf_broadcaster start_campus2.launch
 ```
 
 
