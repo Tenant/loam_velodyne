@@ -196,6 +196,8 @@ void LaserMapping::laserCloudSurfLastHandler(const sensor_msgs::PointCloud2Const
 void LaserMapping::laserCloudFullResHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudFullResMsg)
 {
    _timeLaserCloudFullRes = laserCloudFullResMsg->header.stamp;
+   pointcloudTime = _timeLaserCloudFullRes.toNSec();
+   
    laserCloud().clear();
    pcl::fromROSMsg(*laserCloudFullResMsg, laserCloud());
    _newLaserCloudFullRes = true;

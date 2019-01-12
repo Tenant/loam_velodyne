@@ -41,17 +41,18 @@ void BasicScanRegistration::processScanlines(const Time& scanTime, std::vector<p
     _scanIndices.push_back(range);
   }
 
+
 // ========== MODIFICATION ========== //
-  printf("PCL size =  %d\n",_laserCloud.size());
-  static long long _cur_frame_id = 1;
-  FILE *fp;
-  char filename[50];
-  sprintf(filename, "/home/sukie/Desktop/data/pcl-%ld.txt",_cur_frame_id++);
-  fp=fopen(filename,"w");
-  for(int _idx = 0; _idx < _laserCloud.size(); _idx++){
-    fprintf(fp, "%.6f, %.6f, %.6f, %.6f\n",_laserCloud[_idx].x, _laserCloud[_idx].y, _laserCloud[_idx].z, _laserCloud[_idx].intensity);
-  }
-  fclose(fp);
+  // printf("PCL size =  %d\n",_laserCloud.size());
+  // static long long _cur_frame_id = 1;
+  // FILE *fp;
+  // char filename[255];
+  // sprintf(filename, "/home/sukie/Desktop/data/pcl-%ld-%lld.txt",_cur_frame_id++, pointcloudTime);
+  // fp=fopen(filename,"w");
+  // for(int _idx = 0; _idx < _laserCloud.size(); _idx++){
+  //   fprintf(fp, "%.6f, %.6f, %.6f, %.6f\n",_laserCloud[_idx].x, _laserCloud[_idx].y, _laserCloud[_idx].z, _laserCloud[_idx].intensity);
+  // }
+  // fclose(fp);
   // ========== MODIFICATION ========== //
 
   extractFeatures();

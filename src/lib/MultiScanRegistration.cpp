@@ -151,6 +151,7 @@ void MultiScanRegistration::handleCloudMessage(const sensor_msgs::PointCloud2Con
   // fetch new input cloud
   pcl::PointCloud<pcl::PointXYZ> laserCloudIn;
   pcl::fromROSMsg(*laserCloudMsg, laserCloudIn);
+  pointcloudTime = laserCloudMsg->header.stamp.toNSec();
 
   process(laserCloudIn, fromROSTime(laserCloudMsg->header.stamp));
 }
@@ -160,6 +161,7 @@ void MultiScanRegistration::handleCloudMessage(const sensor_msgs::PointCloud2Con
 void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserCloudIn, const Time& scanTime)
 {
   size_t cloudSize = laserCloudIn.size();
+ 
 
   // determine scan start and end orientations
   float startOri = -std::atan2(laserCloudIn[0].y, laserCloudIn[0].x);
@@ -177,6 +179,7 @@ void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserC
   // clear all scanline points
   std::for_each(_laserCloudScans.begin(), _laserCloudScans.end(), [](auto&&v) {v.clear(); }); 
 
+ 
   // extract valid points from input cloud
   for (int i = 0; i < cloudSize; i++) {
     point.x = laserCloudIn[i].y;
@@ -237,6 +240,7 @@ void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserC
   }
 
   processScanlines(scanTime, _laserCloudScans);
+  
   publishResult();
 }
 

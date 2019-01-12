@@ -48,6 +48,7 @@ namespace loam
      */
     size_t transformToEnd(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud);
 
+    long long pointcloudTime;
   private:
     /** \brief Transform the given point to the start of the sweep.
      *
@@ -71,6 +72,7 @@ namespace loam
     long _frameCount;        ///< number of processed frames
     size_t _maxIterations;   ///< maximum number of iterations
     bool _systemInited;      ///< initialization flag
+
 
     float _deltaTAbort;     ///< optimization abort threshold for deltaT
     float _deltaRAbort;     ///< optimization abort threshold for deltaR

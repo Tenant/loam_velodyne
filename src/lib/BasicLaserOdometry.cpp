@@ -238,9 +238,9 @@ void BasicLaserOdometry::process()
       _pointSearchSurfInd3.resize(surfPointsFlatNum);
 
       int mode_debug = 0; // 0-record points, 1-record delta, 2-record ld2, pd2, ls, ps, 3-don't know
-      FILE *fp;
+      FILE *fp; 
       FILE *fp_ld2, *fp_pd2, *fp_ls, *fp_ps;
-      char filename[50];
+      char filename[255];
       if(mode_debug==1) {
          sprintf(filename, "/home/sukie/Desktop/data/delta-%ld.txt",_frameCount);
          fp=fopen(filename,"w");
@@ -253,7 +253,7 @@ void BasicLaserOdometry::process()
          //printf("Number of Planar Points: %d\n",surfPointsFlatNum);
          pcl::PointXYZI pointSel, pointProj, tripod1, tripod2, tripod3;
          if(mode_debug==0){
-            sprintf(filename, "/home/sukie/Desktop/data/log-%ld-%d.txt",_frameCount,iterCount);
+            sprintf(filename, "/home/sukie/Desktop/data/log-%ld-%d-%lld.txt",_frameCount,iterCount, pointcloudTime);
             fp=fopen(filename,"w");
          }
          if(mode_debug==2){

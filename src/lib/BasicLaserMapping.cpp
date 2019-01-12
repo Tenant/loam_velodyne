@@ -577,6 +577,21 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
    transformFullResToMap();
    _downsizedMapCreated = createDownsizedMap();
 
+   //==========modify to print surrounding pointcloud==========//
+   pcl::PointCloud<pcl::PointXYZI> surrounding_pcl;
+   surrounding_pcl = laserCloudSurroundDS();
+   std::cout<<"The size of laserCloudSurroundDS is "<<surrounding_pcl.size()<<std::endl;
+   static long long _cur_frame_id = 1;
+   FILE *fp;
+   char filename[255];
+   sprintf(filename, "/home/sukie/Desktop/data/surrounding_pcl-%ld-%lld.txt",_cur_frame_id++, pointcloudTime);
+   fp=fopen(filename,"w");
+   for(int _idx = 0; _idx < surrounding_pcl.size(); _idx++){
+     fprintf(fp, "%.6f, %.6f, %.6f, %.6f\n",surrounding_pcl[_idx].x,surrounding_pcl[_idx].y,surrounding_pcl[_idx].z,surrounding_pcl[_idx].intensity);
+   }
+   fclose(fp);
+   //==========modify to print surrounding pointcloud==========//
+
    return true;
 }
 

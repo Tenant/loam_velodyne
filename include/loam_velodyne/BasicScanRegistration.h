@@ -164,6 +164,8 @@ namespace loam
     auto const& surfacePointsLessFlat () { return _surfacePointsLessFlat; }
     auto const& config                () { return _config               ; }
 
+    long long pointcloudTime;
+
   private:
 
     /** \brief Check is IMU data is available. */

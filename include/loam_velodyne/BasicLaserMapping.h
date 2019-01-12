@@ -110,6 +110,8 @@ public:
 
    bool hasFreshMap() const { return _downsizedMapCreated; }
 
+   long long pointcloudTime;
+
 private:
    /** Run an optimization. */
    void optimizeTransformTobeMapped();

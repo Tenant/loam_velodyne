@@ -231,6 +231,7 @@ namespace loam
   void LaserOdometry::laserCloudFullResHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudFullResMsg)
   {
     _timeLaserCloudFullRes = laserCloudFullResMsg->header.stamp;
+    pointcloudTime = _timeLaserCloudFullRes.toNSec();
 
     laserCloud()->clear();
     pcl::fromROSMsg(*laserCloudFullResMsg, *laserCloud());
@@ -290,8 +291,14 @@ namespace loam
       return;// waiting for new data to arrive...
 
     reset();// reset flags, etc.
+    std::ofstream outfile("/home/sukie/Desktop/timestatistics.txt", std::ios_base::app);
+    auto t1 = ros::Time::now();
     BasicLaserOdometry::process();
     publishResult();
+    auto t2 = ros::Time::now();
+    auto timediff = t2 - t1;
+    outfile << std::setprecision(16) << t2.toSec() << std::endl << std::flush;
+    
   }
 
 
