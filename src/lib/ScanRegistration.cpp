@@ -201,10 +201,11 @@ void ScanRegistration::handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn)
 //    fclose(fp);
 //    /* Check Dwdx Data*/
 /*
- exp-01: -y -x h
- exp-02: -x - y h
- exp-03: y -x -h
- exp-04: -y x -z
+ exp-01: -y -x h 1 1 1
+ exp-02: -x - y h 1 1 1
+ exp-03: y -x -h 1 1 1
+ exp-04: -y x -z 1 1 1
+ exp=05: -y x 0-z 1 1 -1
  */
 
     Vector3 pos;
@@ -216,7 +217,7 @@ void ScanRegistration::handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn)
     newState.stamp = fromROSTime(dwdxIn->header.stamp);
     newState.roll = dwdxIn->roll / 18000.0 * 3.141592653 - 3.141592653;
     newState.pitch = dwdxIn->pitch / 18000.0 * 3.141592653;
-    newState.yaw = dwdxIn->heading / 18000.0 * 3.141592653;
+    newState.yaw = dwdxIn->heading / 18000.0 * 3.141592653 * (-1.0);
     newState.position = pos;
 
     updateDwdxData(pos,newState);
