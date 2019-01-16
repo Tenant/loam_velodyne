@@ -9,7 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf
-  pcl_conversions)
+  pcl_conversions
+  message_generation)
 
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
@@ -20,11 +21,22 @@ include_directories(
 	#${EIGEN3_INCLUDE_DIR}
 	${PCL_INCLUDE_DIRS})
 
+add_message_files(
+        FILES
+        dwdx.msg
+)
+
+generate_messages(
+        DEPENDENCIES
+        std_msgs
+)
+
 catkin_package(
   CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs tf pcl_conversions
   DEPENDS EIGEN3 PCL
   INCLUDE_DIRS include
   LIBRARIES loam
+  CATKIN_DEPENDS message_runtime
 )
 
 ## Compile as C++14, supported in ROS Kinetic and newer
@@ -33,11 +45,12 @@ add_compile_options(-std=c++14)
 
 add_definitions( -march=native )
 
-
 add_subdirectory(src/lib)
 
 add_executable(multiScanRegistration src/multi_scan_registration_node.cpp)
 target_link_libraries(multiScanRegistration ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )
+add_dependencies(multiScanRegistration ${${PROJECT_NAME}_EXPORTED_TARGETS})
+#add_dependencies(multiScanRegistration loam_velodyne_generate_message_cpp)
 
 add_executable(laserOdometry src/laser_odometry_node.cpp)
 target_link_libraries(laserOdometry ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )

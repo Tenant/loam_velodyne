@@ -146,7 +146,8 @@ bool ScanRegistration::setupROS(ros::NodeHandle& node, ros::NodeHandle& privateN
     return false;
 
   // subscribe to IMU topic
-  _subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &ScanRegistration::handleIMUMessage, this);
+  //_subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &ScanRegistration::handleIMUMessage, this);
+  _subDwdx = node.subscribe<loam_velodyne::dwdx>("/ros_dwdx", 100, &ScanRegistration::handleDwdxMessage, this);
 
   // advertise scan registration topics
   _pubLaserCloud            = node.advertise<sensor_msgs::PointCloud2>("/velodyne_cloud_2", 2);
@@ -182,6 +183,44 @@ void ScanRegistration::handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn)
 
   updateIMUData(acc, newState);
 }
+
+ void ScanRegistration::handleDwdxMessage(const loam_velodyne::dwdx::ConstPtr& dwdxIn)
+ {
+//    /* Check Dwdx Data */
+//    FILE *fp;
+//    char filename[255]= "/home/sukie/Desktop/data/dwdx.csv";
+//    fp=fopen(filename,"a");
+//
+//    double x = dwdxIn->global_x;
+//    double y = dwdxIn->global_y;
+//    double z = dwdxIn->global_h;
+//    double roll = dwdxIn->roll;
+//    double pitch = dwdxIn->pitch;
+//    double yaw = dwdxIn->heading;
+//    fprintf(fp,"%.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n", x, y, z, roll, pitch, yaw);
+//    fclose(fp);
+//    /* Check Dwdx Data*/
+/*
+ exp-01: -y -x h
+ exp-02: -x - y h
+ exp-03: y -x -h
+ exp-04: -y x -z
+ */
+
+    Vector3 pos;
+    pos.x() = float(-0.1 * dwdxIn->global_y); // x coordinate (m)
+    pos.z() = float( 0.1 * dwdxIn->global_x); // y coordinate (m)
+    pos.y() = float(-0.1 * dwdxIn->global_h); // y hight (m)
+
+    IMUState newState;
+    newState.stamp = fromROSTime(dwdxIn->header.stamp);
+    newState.roll = dwdxIn->roll / 18000.0 * 3.141592653 - 3.141592653;
+    newState.pitch = dwdxIn->pitch / 18000.0 * 3.141592653;
+    newState.yaw = dwdxIn->heading / 18000.0 * 3.141592653;
+    newState.position = pos;
+
+    updateDwdxData(pos,newState);
+ }
 
 
 void ScanRegistration::publishResult()

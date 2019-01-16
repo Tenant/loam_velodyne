@@ -111,6 +111,11 @@ void BasicScanRegistration::updateIMUData(Vector3& acc, IMUState& newState)
   _imuHistory.push(newState);
 }
 
+void BasicScanRegistration::updateDwdxData(Vector3& pos, IMUState& newState)
+{
+  _imuHistory.push(newState);
+}
+
 
 void BasicScanRegistration::projectPointToStartOfSweep(pcl::PointXYZI& point, float relTime)
 {

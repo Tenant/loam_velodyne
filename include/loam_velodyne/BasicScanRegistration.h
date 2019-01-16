@@ -147,6 +147,7 @@ namespace loam
 
     /** \brief Update new IMU state. NOTE: MUTATES ARGS! */
     void updateIMUData(Vector3& acc, IMUState& newState);
+    void updateDwdxData(Vector3& pos, IMUState& newState);
 
     /** \brief Project a point to the start of the sweep using corresponding IMU data
     *

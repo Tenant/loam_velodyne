@@ -237,7 +237,7 @@ void BasicLaserOdometry::process()
       _pointSearchSurfInd2.resize(surfPointsFlatNum);
       _pointSearchSurfInd3.resize(surfPointsFlatNum);
 
-      int mode_debug = 0; // 0-record points, 1-record delta, 2-record ld2, pd2, ls, ps, 3-don't know
+      int mode_debug = 3; // 0-record points, 1-record delta, 2-record ld2, pd2, ls, ps, 3-don't know
       FILE *fp; 
       FILE *fp_ld2, *fp_pd2, *fp_ls, *fp_ps;
       char filename[255];

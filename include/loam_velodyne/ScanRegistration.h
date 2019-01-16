@@ -40,6 +40,7 @@
 
 #include <ros/node_handle.h>
 #include <sensor_msgs/Imu.h>
+#include <loam_velodyne/dwdx.h>
 
 #include "BasicScanRegistration.h"
 
@@ -68,6 +69,7 @@ namespace loam
      * @param imuIn the new IMU message
      */
     virtual void handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn);
+    virtual void handleDwdxMessage(const loam_velodyne::dwdx::ConstPtr& dwdxIn);
 
   protected:
     /** \brief Publish the current result via the respective topics. */
@@ -84,6 +86,7 @@ namespace loam
 
   private:
     ros::Subscriber _subImu;                    ///< IMU message subscriber
+    ros::Subscriber _subDwdx;                   ///< Dwdx message subscriber
     ros::Publisher _pubLaserCloud;              ///< full resolution cloud message publisher
     ros::Publisher _pubCornerPointsSharp;       ///< sharp corner cloud message publisher
     ros::Publisher _pubCornerPointsLessSharp;   ///< less sharp corner cloud message publisher
