@@ -712,7 +712,6 @@ void BasicLaserOdometry::process()
 
    Angle rx, ry, rz;
    //printf("Validation: %.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n",_transformSum.rot_x,_transformSum.rot_y,_transformSum.rot_z,_transformSum.pos.x(),_transformSum.pos.y(),_transformSum.pos.z());
-   printf("Validation: %.6f\n",_transformSum.pos.x());
    accumulateRotation(_transformSum.rot_x,
                       _transformSum.rot_y,
                       _transformSum.rot_z,

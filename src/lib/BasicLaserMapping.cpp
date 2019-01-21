@@ -196,6 +196,13 @@ void BasicLaserMapping::transformUpdate()
 
       _transformTobeMapped.rot_x = 0.998 * _transformTobeMapped.rot_x.rad() + 0.002 * imuCur.pitch.rad();
       _transformTobeMapped.rot_z = 0.998 * _transformTobeMapped.rot_z.rad() + 0.002 * imuCur.roll.rad();
+/* DYP */
+//      _transformTobeMapped.rot_x = 0.0 * _transformTobeMapped.rot_x.rad() + 1.0 * imuCur.pitch.rad();
+//      _transformTobeMapped.rot_z = 0.0 * _transformTobeMapped.rot_z.rad() + 1.0 * imuCur.roll.rad();
+//      _transformTobeMapped.rot_y = imuCur.yaw;
+//      _transformTobeMapped.pos.x() = imuCur.x;
+//      _transformTobeMapped.pos.y() = imuCur.y;
+//      _transformTobeMapped.pos.z() = imuCur.z;
    }
 
    _transformBefMapped = _transformSum;

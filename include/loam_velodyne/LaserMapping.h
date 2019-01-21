@@ -43,6 +43,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
+#include <loam_velodyne/dwdx.h>
 
 
 
@@ -86,12 +87,14 @@ public:
     * @param laserOdometry the new laser odometry message
     */
    void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry);
+   void laserOdometry_dwdx_Handler(const loam_velodyne::dwdx::ConstPtr& dwdxIn);
 
    /** \brief Handler method for IMU messages.
     *
     * @param imuIn the new IMU message
     */
    void imuHandler(const sensor_msgs::Imu::ConstPtr& imuIn);
+   void dwdxHandler(const loam_velodyne::dwdx::ConstPtr& dwdxIn);
 
    /** \brief Process incoming messages in a loop until shutdown (used in active mode). */
    void spin();
@@ -135,6 +138,8 @@ private:
    ros::Subscriber _subLaserCloudFullRes;      ///< full resolution cloud message subscriber
    ros::Subscriber _subLaserOdometry;          ///< laser odometry message subscriber
    ros::Subscriber _subImu;                    ///< IMU message subscriber
+   ros::Subscriber _subDwdx;
+   ros::Subscriber _subLaserOdometry_dwdx;
 };
 
 } // end namespace loam

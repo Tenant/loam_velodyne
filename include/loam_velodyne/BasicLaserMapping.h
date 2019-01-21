@@ -55,6 +55,12 @@ typedef struct IMUState2
    /** The current pitch angle. */
    Angle pitch;
 
+   Angle yaw;
+
+   double x;
+   double y;
+   double z;
+
    /** \brief Interpolate between two IMU states.
     *
     * @param start the first IMU state
@@ -71,6 +77,10 @@ typedef struct IMUState2
 
       result.roll = start.roll.rad() * invRatio + end.roll.rad() * ratio;
       result.pitch = start.pitch.rad() * invRatio + end.pitch.rad() * ratio;
+      result.yaw = start.yaw.rad() * invRatio + end.yaw.rad() * ratio;
+      result.x = start.x * invRatio + end.x * ratio;
+      result.y = start.y * invRatio + end.y * ratio;
+      result.z = start.z * invRatio + end.z * ratio;
    };
 } IMUState2;
 

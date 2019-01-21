@@ -165,12 +165,15 @@ bool LaserMapping::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 
    _subLaserOdometry = node.subscribe<nav_msgs::Odometry>
       ("/laser_odom_to_init", 5, &LaserMapping::laserOdometryHandler, this);
+//   _subLaserOdometry_dwdx = node.subscribe<loam_velodyne::dwdx>
+//           ("/ros_dwdx", 100, &LaserMapping::laserOdometry_dwdx_Handler, this);
 
    _subLaserCloudFullRes = node.subscribe<sensor_msgs::PointCloud2>
       ("/velodyne_cloud_3", 2, &LaserMapping::laserCloudFullResHandler, this);
 
    // subscribe to IMU topic
-   _subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &LaserMapping::imuHandler, this);
+   //_subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &LaserMapping::imuHandler, this);
+   _subDwdx = node.subscribe<loam_velodyne::dwdx>("/ros_dwdx", 100, &LaserMapping::dwdxHandler, this);
 
    return true;
 }
@@ -219,6 +222,28 @@ void LaserMapping::laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& lase
    _newLaserOdometry = true;
 }
 
+void LaserMapping::laserOdometry_dwdx_Handler(const loam_velodyne::dwdx::ConstPtr& dwdxIn)
+{
+   _timeLaserOdometry = dwdxIn->header.stamp;
+
+   double roll, pitch, yaw;
+   roll = dwdxIn->roll / 18000.0 * 3.141592653;
+   pitch = dwdxIn->pitch / 18000.0 * 3.141592653;
+   yaw = (dwdxIn->heading / 18000.0 * 3.141592653 - 3.141592653)* (1.0);
+   tf::Quaternion _orientation;
+   _orientation.setRPY(roll, pitch, yaw);
+   geometry_msgs::Quaternion geoQuat;
+   geoQuat.x = _orientation.x();
+   geoQuat.y = _orientation.y();
+   geoQuat.z = _orientation.z();
+   geoQuat.w = _orientation.w();
+   tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w)).getRPY(roll, pitch, yaw);
+   updateOdometry(-pitch, -yaw, roll,
+           -1.0 * dwdxIn->global_y,
+           1.0 * dwdxIn->global_x,
+           -1.0 * dwdxIn->global_h);
+}
+
 void LaserMapping::imuHandler(const sensor_msgs::Imu::ConstPtr& imuIn)
 {
    double roll, pitch, yaw;
@@ -226,6 +251,25 @@ void LaserMapping::imuHandler(const sensor_msgs::Imu::ConstPtr& imuIn)
    tf::quaternionMsgToTF(imuIn->orientation, orientation);
    tf::Matrix3x3(orientation).getRPY(roll, pitch, yaw);
    updateIMU({ fromROSTime(imuIn->header.stamp) , roll, pitch });
+}
+
+void LaserMapping::dwdxHandler(const loam_velodyne::dwdx::ConstPtr& dwdxIn)
+{
+   double roll, pitch, yaw;
+   roll = dwdxIn->roll / 18000.0 * 3.141592653;
+   pitch = dwdxIn->pitch / 18000.0 * 3.141592653;
+   yaw = (dwdxIn->heading / 18000.0 * 3.141592653 - 3.141592653)* (1.0);
+   tf::Quaternion _orientation;
+   _orientation.setRPY(roll, pitch, yaw);
+   geometry_msgs::Quaternion geo_orientation;
+   geo_orientation.x = _orientation.x();
+   geo_orientation.y = _orientation.y();
+   geo_orientation.z = _orientation.z();
+   geo_orientation.w = _orientation.w();
+   tf::Quaternion orientation;
+   tf::quaternionMsgToTF(geo_orientation, orientation);
+   tf::Matrix3x3(orientation).getRPY(roll, pitch, yaw);
+   updateIMU({ fromROSTime(dwdxIn->header.stamp) , roll, pitch, yaw, -0.1 * dwdxIn->global_y, 0.1 * dwdxIn->global_x, -0.1 * dwdxIn->global_h });
 }
 
 void LaserMapping::spin()

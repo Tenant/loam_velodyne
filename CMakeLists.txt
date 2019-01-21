@@ -57,6 +57,7 @@ target_link_libraries(laserOdometry ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )
 
 add_executable(laserMapping src/laser_mapping_node.cpp)
 target_link_libraries(laserMapping ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )
+add_dependencies(multiScanRegistration ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_executable(transformMaintenance src/transform_maintenance_node.cpp)
 target_link_libraries(transformMaintenance ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )

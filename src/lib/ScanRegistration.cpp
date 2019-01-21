@@ -186,20 +186,20 @@ void ScanRegistration::handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn)
 
  void ScanRegistration::handleDwdxMessage(const loam_velodyne::dwdx::ConstPtr& dwdxIn)
  {
-//    /* Check Dwdx Data */
-//    FILE *fp;
-//    char filename[255]= "/home/sukie/Desktop/data/dwdx.csv";
-//    fp=fopen(filename,"a");
+//   /* Check Dwdx Data */
+//   FILE *fp;
+//   char filename[255]= "/home/sukie/Desktop/data/dwdx.csv";
+//   fp=fopen(filename,"a");
 //
-//    double x = dwdxIn->global_x;
-//    double y = dwdxIn->global_y;
-//    double z = dwdxIn->global_h;
-//    double roll = dwdxIn->roll;
-//    double pitch = dwdxIn->pitch;
-//    double yaw = dwdxIn->heading;
-//    fprintf(fp,"%.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n", x, y, z, roll, pitch, yaw);
-//    fclose(fp);
-//    /* Check Dwdx Data*/
+//   double x = dwdxIn->global_x;
+//   double y = dwdxIn->global_y;
+//   double z = dwdxIn->global_h;
+//   double roll = dwdxIn->roll;
+//   double pitch = dwdxIn->pitch;
+//   double yaw = dwdxIn->heading;
+//   fprintf(fp,"%.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n", x, y, z, roll, pitch, yaw);
+//   fclose(fp);
+//   /* Check Dwdx Data*/
 /*
  exp-01: -y -x h 1 1 1
  exp-02: -x - y h 1 1 1
@@ -215,9 +215,9 @@ void ScanRegistration::handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn)
 
     IMUState newState;
     newState.stamp = fromROSTime(dwdxIn->header.stamp);
-    newState.roll = dwdxIn->roll / 18000.0 * 3.141592653 - 3.141592653;
+    newState.roll = dwdxIn->roll / 18000.0 * 3.141592653;
     newState.pitch = dwdxIn->pitch / 18000.0 * 3.141592653;
-    newState.yaw = dwdxIn->heading / 18000.0 * 3.141592653 * (-1.0);
+    newState.yaw = (dwdxIn->heading / 18000.0 * 3.141592653 - 3.141592653)* (1.0);
     newState.position = pos;
 
     updateDwdxData(pos,newState);
