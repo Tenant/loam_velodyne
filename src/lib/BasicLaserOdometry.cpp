@@ -56,6 +56,8 @@ void BasicLaserOdometry::transformToStart(const pcl::PointXYZI& pi, pcl::PointXY
 
 size_t BasicLaserOdometry::transformToEnd(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud)
 {
+    /* CRITICAL TEMP */
+//    return 1;
    size_t cloudSize = cloud->points.size();
 
    for (size_t i = 0; i < cloudSize; i++)
@@ -248,9 +250,6 @@ void BasicLaserOdometry::process()
 
       for (size_t iterCount = 0; iterCount < _maxIterations; iterCount++)
       {
-         //printf("Iteration %d:\n",iterCount);
-         //printf("Number of Corner Points: %d\n",cornerPointsSharpNum);
-         //printf("Number of Planar Points: %d\n",surfPointsFlatNum);
          pcl::PointXYZI pointSel, pointProj, tripod1, tripod2, tripod3;
          if(mode_debug==0){
             sprintf(filename, "/home/sukie/Desktop/data/log-%ld-%d-%lld.txt",_frameCount,iterCount, pointcloudTime);
@@ -272,7 +271,7 @@ void BasicLaserOdometry::process()
 
          for (int i = 0; i < cornerPointsSharpNum; i++)
          {
-            transformToStart(_cornerPointsSharp->points[i], pointSel);
+            transformToStart(_cornerPointsSharp->points[i], pointSel); /* transition of the coordinattion */
 
             if (iterCount % 5 == 0)
             {
@@ -405,7 +404,7 @@ void BasicLaserOdometry::process()
 
          for (int i = 0; i < surfPointsFlatNum; i++)
          {
-            transformToStart(_surfPointsFlat->points[i], pointSel);
+            transformToStart(_surfPointsFlat->points[i], pointSel); /* transition of the coordinattion */
 
             if (iterCount % 5 == 0)
             {
@@ -655,17 +654,11 @@ void BasicLaserOdometry::process()
          }
 
          _transform.rot_x = _transform.rot_x.rad() + matX(0, 0);
-         //_transform.rot_x = -0.0306;
          _transform.rot_y = _transform.rot_y.rad() + matX(1, 0);
-         //_transform.rot_y = -4.5749;
          _transform.rot_z = _transform.rot_z.rad() + matX(2, 0);
-         //_transform.rot_z = -0.0310;
          _transform.pos.x() += matX(3, 0);
-         //_transform.pos.x() = 0.0; //-92.5619;
          _transform.pos.y() += matX(4, 0);
-         //_transform.pos.y() = -83.8084;
          _transform.pos.z() += matX(5, 0);
-         //_transform.pos.z() = 0.0; //-252.5517;
 
          if (!pcl_isfinite(_transform.rot_x.rad())) _transform.rot_x = Angle();
          if (!pcl_isfinite(_transform.rot_y.rad())) _transform.rot_y = Angle();
@@ -731,19 +724,12 @@ void BasicLaserOdometry::process()
                      _imuPitchEnd, _imuYawEnd, _imuRollEnd,
                      rx, ry, rz);
 
-   /* rx, ry, rz, trans */
-   //Vector3 new_trans(trans.x(),-83.8084,trans.z());
-   Vector3 new_trans(-92.5919,-83.8084,-252.5517);
-   Angle gt_rx(float(0.0306));
-   Angle gt_ry(float(-4.5759));
-   Angle gt_rz(float(-0.0310));
-
    _transformSum.rot_x = rx;
    _transformSum.rot_y = ry;
    _transformSum.rot_z = rz;
    _transformSum.pos = trans;
 
-   transformToEnd(_cornerPointsLessSharp);
+   transformToEnd(_cornerPointsLessSharp); /* Transition of Coordination and send to next node */
    transformToEnd(_surfPointsLessFlat);
 
    _cornerPointsLessSharp.swap(_lastCornerCloud);

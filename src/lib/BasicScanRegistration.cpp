@@ -41,7 +41,6 @@ void BasicScanRegistration::processScanlines(const Time& scanTime, std::vector<p
     _scanIndices.push_back(range);
   }
 
-
 // ========== MODIFICATION ========== //
 //   printf("PCL size =  %d\n",_laserCloud.size());
 //   static long long _cur_frame_id = 1;
@@ -54,9 +53,10 @@ void BasicScanRegistration::processScanlines(const Time& scanTime, std::vector<p
 //   }
 //   fclose(fp);
   // ========== MODIFICATION ========== //
-
+#ifdef SCAN_MATCHING_ON
   extractFeatures();
   updateIMUTransform();
+#endif
 }
 
 bool BasicScanRegistration::configure(const RegistrationParams& config)

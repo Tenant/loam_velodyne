@@ -81,6 +81,7 @@ public:
     * @param laserCloudFullResMsg the new full resolution cloud message
     */
    void laserCloudFullResHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudFullResMsg);
+   void laserCloudFullResHandler_origin(const sensor_msgs::PointCloud2ConstPtr& laserCloudFullResMsg);
 
    /** \brief Handler method for a new laser odometry.
     *
@@ -117,11 +118,13 @@ private:
    ros::Time _timeLaserCloudCornerLast;   ///< time of current last corner cloud
    ros::Time _timeLaserCloudSurfLast;     ///< time of current last surface cloud
    ros::Time _timeLaserCloudFullRes;      ///< time of current full resolution cloud
+   ros::Time _timeLaserCloudFullRes_origin;
    ros::Time _timeLaserOdometry;          ///< time of current laser odometry
 
    bool _newLaserCloudCornerLast;  ///< flag if a new last corner cloud has been received
    bool _newLaserCloudSurfLast;    ///< flag if a new last surface cloud has been received
    bool _newLaserCloudFullRes;     ///< flag if a new full resolution cloud has been received
+   bool _newLaserCloudFullRes_origin;
    bool _newLaserOdometry;         ///< flag if a new laser odometry has been received
 
 
@@ -136,6 +139,7 @@ private:
    ros::Subscriber _subLaserCloudCornerLast;   ///< last corner cloud message subscriber
    ros::Subscriber _subLaserCloudSurfLast;     ///< last surface cloud message subscriber
    ros::Subscriber _subLaserCloudFullRes;      ///< full resolution cloud message subscriber
+   ros::Subscriber  _subLaserCloudFullRes_origin; /// < full resolution cloud message subscriber based on the original coordinattion
    ros::Subscriber _subLaserOdometry;          ///< laser odometry message subscriber
    ros::Subscriber _subImu;                    ///< IMU message subscriber
    ros::Subscriber _subDwdx;

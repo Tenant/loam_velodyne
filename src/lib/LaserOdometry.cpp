@@ -291,13 +291,13 @@ namespace loam
       return;// waiting for new data to arrive...
 
     reset();// reset flags, etc.
-    std::ofstream outfile("/home/sukie/Desktop/timestatistics.txt", std::ios_base::app);
-    auto t1 = ros::Time::now();
+//    std::ofstream outfile("/home/sukie/Desktop/timestatistics.txt", std::ios_base::app);
+//    auto t1 = ros::Time::now();
     BasicLaserOdometry::process();
     publishResult();
-    auto t2 = ros::Time::now();
-    auto timediff = t2 - t1;
-    outfile << std::setprecision(16) << t2.toSec() << std::endl << std::flush;
+//    auto t2 = ros::Time::now();
+//    auto timediff = t2 - t1;
+//    outfile << std::setprecision(16) << t2.toSec() << std::endl << std::flush;
     
   }
 
@@ -331,7 +331,9 @@ namespace loam
       publishCloudMsg(_pubLaserCloudCornerLast, *lastCornerCloud(), sweepTime, "/camera");
       publishCloudMsg(_pubLaserCloudSurfLast, *lastSurfaceCloud(), sweepTime, "/camera");
 
-      transformToEnd(laserCloud());  // transform full resolution cloud to sweep end before sending it
+#ifdef SCAN_MATCHING_ON
+      transformToEnd(laserCloud());
+#endif
       publishCloudMsg(_pubLaserCloudFullRes, *laserCloud(), sweepTime, "/camera");
     }
   }

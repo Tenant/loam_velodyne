@@ -32,9 +32,9 @@
 
 #include "loam_velodyne/ScanRegistration.h"
 #include "math_utils.h"
+#include "Configuration.h"
 
 #include <tf/transform_datatypes.h>
-
 
 namespace loam {
 
@@ -145,9 +145,11 @@ bool ScanRegistration::setupROS(ros::NodeHandle& node, ros::NodeHandle& privateN
   if (!parseParams(privateNode, config_out))
     return false;
 
-  // subscribe to IMU topic
-  //_subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &ScanRegistration::handleIMUMessage, this);
+#ifdef IMU_ON
+   // subscribe to IMU topic
+   //_subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &ScanRegistration::handleIMUMessage, this);
   _subDwdx = node.subscribe<loam_velodyne::dwdx>("/ros_dwdx", 100, &ScanRegistration::handleDwdxMessage, this);
+#endif
 
   // advertise scan registration topics
   _pubLaserCloud            = node.advertise<sensor_msgs::PointCloud2>("/velodyne_cloud_2", 2);
@@ -186,38 +188,36 @@ void ScanRegistration::handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn)
 
  void ScanRegistration::handleDwdxMessage(const loam_velodyne::dwdx::ConstPtr& dwdxIn)
  {
-//   /* Check Dwdx Data */
-//   FILE *fp;
-//   char filename[255]= "/home/sukie/Desktop/data/dwdx.csv";
-//   fp=fopen(filename,"a");
-//
-//   double x = dwdxIn->global_x;
-//   double y = dwdxIn->global_y;
-//   double z = dwdxIn->global_h;
-//   double roll = dwdxIn->roll;
-//   double pitch = dwdxIn->pitch;
-//   double yaw = dwdxIn->heading;
-//   fprintf(fp,"%.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n", x, y, z, roll, pitch, yaw);
-//   fclose(fp);
-//   /* Check Dwdx Data*/
-/*
- exp-01: -y -x h 1 1 1
- exp-02: -x - y h 1 1 1
- exp-03: y -x -h 1 1 1
- exp-04: -y x -z 1 1 1
- exp=05: -y x 0-z 1 1 -1
- */
+#ifdef LOG_ON
+   FILE *fp;
+   char filename[255]= "/home/sukie/Desktop/data/dwdx_origin.csv";
+   fp=fopen(filename,"a");
 
-    Vector3 pos;
-    pos.x() = float(-0.1 * dwdxIn->global_y); // x coordinate (m)
-    pos.z() = float( 0.1 * dwdxIn->global_x); // y coordinate (m)
-    pos.y() = float(-0.1 * dwdxIn->global_h); // y hight (m)
+   double x = dwdxIn->global_x;
+   double y = dwdxIn->global_y;
+   double z = dwdxIn->global_h;
+   double roll = dwdxIn->roll;
+   double pitch = dwdxIn->pitch;
+   double yaw = dwdxIn->heading;
+   fprintf(fp,"%.6f, %.6f, %.6f, %.6f, %.6f, %.6f\n", x, y, z, roll, pitch, yaw);
+   fclose(fp);
+#endif
 
     IMUState newState;
+    Vector3 pos;
+
     newState.stamp = fromROSTime(dwdxIn->header.stamp);
-    newState.roll = dwdxIn->roll / 18000.0 * 3.141592653;
-    newState.pitch = dwdxIn->pitch / 18000.0 * 3.141592653;
-    newState.yaw = (dwdxIn->heading / 18000.0 * 3.141592653 - 3.141592653)* (1.0);
+    newState.roll = 1.0 * dwdxIn->roll / 18000.0 * M_PI; // fixed
+    newState.pitch = 1.0 * dwdxIn->pitch / 18000.0 * M_PI;
+    newState.yaw = -M_PI * 0.0 - (dwdxIn->heading / 18000.0 * M_PI); // fixed
+    pos.x() = 1.0 * float( 0.1 * dwdxIn->global_x - x_origin);
+    pos.z() = 1.0 * float( 0.1 * dwdxIn->global_y - y_origin);
+    pos.y() = 1.0 * float(0.1 * dwdxIn->global_h - z_origin);
+
+    double theta = yaw_origin / 180 * M_PI;
+    rotY(pos, theta - M_PI_2);
+
+    newState.yaw += theta;
     newState.position = pos;
 
     updateDwdxData(pos,newState);

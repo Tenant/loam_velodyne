@@ -170,6 +170,11 @@ void BasicLaserMapping::transformAssociateToMap()
 
 void BasicLaserMapping::transformUpdate()
 {
+    FILE *fp;
+    char filename[255]= "/home/sukie/Desktop/data/dwdx_transformTobeMapped.csv";
+    fp=fopen(filename,"a");
+    fprintf(fp,"%.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n", _transformTobeMapped.pos.x(),_transformTobeMapped.pos.y(), _transformTobeMapped.pos.z(), _transformTobeMapped.rot_x.rad(), _transformTobeMapped.rot_y.rad(), _transformTobeMapped.rot_z.rad());
+    fclose(fp);
    if (0 < _imuHistory.size())
    {
       size_t imuIdx = 0;
@@ -185,24 +190,53 @@ void BasicLaserMapping::transformUpdate()
       {
          // scan time newer then newest or older than oldest IMU message
          imuCur = _imuHistory[imuIdx];
+#ifdef DUBUG_ON
+         printf("%d %lf %lf %lf FUCK0\n", imuIdx, _imuHistory[imuIdx].x, _imuHistory[imuIdx].y, _imuHistory[imuIdx].z);
+#endif
+         if(toSec(_imuHistory[imuIdx].stamp - _laserOdometryTime) > 0.1) printf("Time diff: %.4f %d\n",_imuHistory[imuIdx].stamp - _laserOdometryTime, imuIdx);
       }
       else
       {
-         float ratio = (toSec(_imuHistory[imuIdx].stamp - _laserOdometryTime) - _scanPeriod)
+          float ratio = (toSec(_imuHistory[imuIdx].stamp - _laserOdometryTime) - _scanPeriod)
             / toSec(_imuHistory[imuIdx].stamp - _imuHistory[imuIdx - 1].stamp);
-
-         IMUState2::interpolate(_imuHistory[imuIdx], _imuHistory[imuIdx - 1], ratio, imuCur);
+          //TODO: modify interpolate and delte find-nearest-method
+//         IMUState2::interpolate(_imuHistory[imuIdx], _imuHistory[imuIdx - 1], ratio, imuCur);
+         if(toSec(_imuHistory[imuIdx].stamp - _laserOdometryTime) > toSec(_laserOdometryTime - _imuHistory[imuIdx - 1].stamp)){
+             imuCur.x = _imuHistory[imuIdx - 1].x;
+             imuCur.y = _imuHistory[imuIdx - 1].y;
+             imuCur.z = _imuHistory[imuIdx - 1].z;
+             imuCur.roll = Angle(_imuHistory[imuIdx - 1].roll.rad());
+             imuCur.pitch = Angle(_imuHistory[imuIdx - 1].pitch.rad());
+             imuCur.yaw = Angle(_imuHistory[imuIdx - 1].yaw.rad());
+         }
+         else{
+             imuCur.x = _imuHistory[imuIdx ].x;
+             imuCur.y = _imuHistory[imuIdx ].y;
+             imuCur.z = _imuHistory[imuIdx ].z;
+             imuCur.roll = Angle(_imuHistory[imuIdx ].roll.rad());
+             imuCur.pitch = Angle(_imuHistory[imuIdx ].pitch.rad());
+             imuCur.yaw = Angle(_imuHistory[imuIdx].yaw.rad());
+         }
+         if(toSec(_imuHistory[imuIdx].stamp - _laserOdometryTime) > 0.1) printf("Time diff: %.4f\n",_imuHistory[imuIdx].stamp - _laserOdometryTime);
       }
 
       _transformTobeMapped.rot_x = 0.998 * _transformTobeMapped.rot_x.rad() + 0.002 * imuCur.pitch.rad();
       _transformTobeMapped.rot_z = 0.998 * _transformTobeMapped.rot_z.rad() + 0.002 * imuCur.roll.rad();
-/* DYP */
-//      _transformTobeMapped.rot_x = 0.0 * _transformTobeMapped.rot_x.rad() + 1.0 * imuCur.pitch.rad();
-//      _transformTobeMapped.rot_z = 0.0 * _transformTobeMapped.rot_z.rad() + 1.0 * imuCur.roll.rad();
-//      _transformTobeMapped.rot_y = imuCur.yaw;
-//      _transformTobeMapped.pos.x() = imuCur.x;
-//      _transformTobeMapped.pos.y() = imuCur.y;
-//      _transformTobeMapped.pos.z() = imuCur.z;
+
+      _dwdx.rot_x = imuCur.pitch.rad();
+      _dwdx.rot_y = imuCur.yaw.rad();
+      _dwdx.rot_z = imuCur.roll.rad();
+      _dwdx.pos.x() = imuCur.x;
+      _dwdx.pos.y() = imuCur.y;
+      _dwdx.pos.z() = imuCur.z;
+
+#ifdef LOG_ON
+       FILE *fp;
+       char filename[255]= "/home/sukie/Desktop/data/dwdx_result_imuCur.csv";
+       fp=fopen(filename,"a");
+       fprintf(fp,"%.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n", imuCur.x,imuCur.y, imuCur.z, _dwdx.rot_x.rad(), _dwdx.rot_y.rad(), _dwdx.rot_z.rad());
+       fclose(fp);
+#endif
    }
 
    _transformBefMapped = _transformSum;
@@ -217,15 +251,24 @@ void BasicLaserMapping::pointAssociateToMap(const pcl::PointXYZI& pi, pcl::Point
    po.y = pi.y;
    po.z = pi.z;
    po.intensity = pi.intensity;
-
    rotateZXY(po, _transformTobeMapped.rot_z, _transformTobeMapped.rot_x, _transformTobeMapped.rot_y);
-
    po.x += _transformTobeMapped.pos.x();
    po.y += _transformTobeMapped.pos.y();
    po.z += _transformTobeMapped.pos.z();
 }
 
-
+void BasicLaserMapping::pointAssociateToMap_dwdx(const pcl::PointXYZI pi, pcl::PointXYZI& po)
+{
+    po.x = pi.x;
+    po.y = pi.y;
+    po.z = pi.z;
+    po.intensity = pi.intensity;
+    rotateZXY(po, _dwdx.rot_z, _dwdx.rot_x, _dwdx.rot_y);
+    po.x += _dwdx.pos.x();
+    po.y += _dwdx.pos.y();
+    po.z += _dwdx.pos.z();
+//    printf("dwdx: %.4f %.4f %.4f %.4f %.4f %.4f\n", _dwdx.pos.x(), _dwdx.pos.y(), _dwdx.pos.z(), _dwdx.rot_x.rad(), _dwdx.rot_y.rad(), _dwdx.rot_z.rad());
+}
 
 void BasicLaserMapping::pointAssociateTobeMapped(const pcl::PointXYZI& pi, pcl::PointXYZI& po)
 {
@@ -268,6 +311,26 @@ bool BasicLaserMapping::createDownsizedMap()
    _downSizeFilterCorner.setInputCloud(_laserCloudSurround);
    _downSizeFilterCorner.filter(*_laserCloudSurroundDS);
    return true;
+}
+
+/* Self-defined function to generate map based on dwdx */
+bool BasicLaserMapping::createDownsizedMap_dwdx()
+{
+//    _laserCloudSurroundDS->clear();
+//    *_laserCloudSurround += *_laserCloudFullRes;
+//    _downSizeFilterCorner.setInputCloud(_laserCloudFullRes);
+//    _downSizeFilterCorner.filter(*_laserCloudFullRes);
+    for(int idx = 0 ; idx < _laserCloudFullRes->size(); idx+=200) // 200
+    {
+        pcl::PointXYZI pi = _laserCloudFullRes->points[idx];
+        pcl::PointXYZI po;
+        pointAssociateToMap_dwdx(pi, po);
+        _laserCloudSurroundDS->push_back(po);
+    }
+    std::cout<<std::endl;
+    std::cout<<"_laserCloudFullRes: "<<_laserCloudFullRes->size()<<std::endl;
+    std::cout<<"_laserCloudSurroundDS: "<<_laserCloudSurroundDS->size()<<std::endl;
+    return true;
 }
 
 bool BasicLaserMapping::process(Time const& laserOdometryTime)
@@ -580,11 +643,14 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
       _laserCloudCornerArray[ind].swap(_laserCloudCornerDSArray[ind]);
       _laserCloudSurfArray[ind].swap(_laserCloudSurfDSArray[ind]);
    }
-
+#ifdef SCAN_MATCHING_ON
    transformFullResToMap();
    _downsizedMapCreated = createDownsizedMap();
+#else
+   _downsizedMapCreated = createDownsizedMap_dwdx();
+#endif
 
-   //==========modify to print surrounding pointcloud==========//
+//   ==========modify to print surrounding pointcloud==========//
 //   pcl::PointCloud<pcl::PointXYZI> surrounding_pcl;
 //   surrounding_pcl = laserCloudSurroundDS();
 //   std::cout<<"The size of laserCloudSurroundDS is "<<surrounding_pcl.size()<<std::endl;
@@ -597,7 +663,7 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
 //     fprintf(fp, "%.6f, %.6f, %.6f, %.6f\n",surrounding_pcl[_idx].x,surrounding_pcl[_idx].y,surrounding_pcl[_idx].z,surrounding_pcl[_idx].intensity);
 //   }
 //   fclose(fp);
-   //==========modify to print surrounding pointcloud==========//
+//   ==========modify to print surrounding pointcloud==========//
 
    return true;
 }
@@ -630,8 +696,10 @@ nanoflann::KdTreeFLANN<pcl::PointXYZI> kdtreeSurfFromMap;
 void BasicLaserMapping::optimizeTransformTobeMapped()
 {
    if (_laserCloudCornerFromMap->size() <= 10 || _laserCloudSurfFromMap->size() <= 100)
-      return;
-
+   {
+       transformUpdate();
+       return;
+   }
    pcl::PointXYZI pointSel, pointOri, /*pointProj, */coeff;
 
    std::vector<int> pointSearchInd(5, 0);

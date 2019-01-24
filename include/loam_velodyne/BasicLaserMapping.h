@@ -96,6 +96,7 @@ public:
    void updateOdometry(Twist const& twist);
 
    auto& laserCloud() { return *_laserCloudFullRes; }
+   auto& laserCloud_origin() { return *_laserCloudFullRes_origin; }
    auto& laserCloudCornerLast() { return *_laserCloudCornerLast; }
    auto& laserCloudSurfLast() { return *_laserCloudSurfLast; }
 
@@ -116,7 +117,7 @@ public:
 
    auto const& transformAftMapped()   const { return _transformAftMapped; }
    auto const& transformBefMapped()   const { return _transformBefMapped; }
-   auto const& laserCloudSurroundDS() const { return *_laserCloudSurroundDS; }
+   auto const& laserCloudSurroundDS() const { return *_laserCloudSurroundDS; } // The Downsampled map
 
    bool hasFreshMap() const { return _downsizedMapCreated; }
 
@@ -129,10 +130,12 @@ private:
    void transformAssociateToMap();
    void transformUpdate();
    void pointAssociateToMap(const pcl::PointXYZI& pi, pcl::PointXYZI& po);
+   void pointAssociateToMap_dwdx(const pcl::PointXYZI pi, pcl::PointXYZI& po);
    void pointAssociateTobeMapped(const pcl::PointXYZI& pi, pcl::PointXYZI& po);
    void transformFullResToMap();
 
    bool createDownsizedMap();
+   bool createDownsizedMap_dwdx();
 
    // private:
    size_t toIndex(int i, int j, int k) const
@@ -144,7 +147,7 @@ private:
    float _scanPeriod;          ///< time per scan
    const int _stackFrameNum;
    const int _mapFrameNum;
-   long _frameCount;
+
    long _mapFrameCount;
 
    size_t _maxIterations;  ///< maximum number of iterations
@@ -159,9 +162,12 @@ private:
    const size_t _laserCloudDepth;
    const size_t _laserCloudNum;
 
-   pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudCornerLast;   ///< last corner points cloud
-   pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudSurfLast;     ///< last surface points cloud
-   pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudFullRes;      ///< last full resolution cloud
+    long _frameCount;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudCornerLast;   ///< last corner points cloud
+    pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudSurfLast;     ///< last surface points cloud
+    pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudFullRes;      ///< last full resolution cloud
+    pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudFullRes_origin;      ///< last full resolution cloud
+
 
    pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudCornerStack;
    pcl::PointCloud<pcl::PointXYZI>::Ptr _laserCloudSurfStack;
@@ -176,8 +182,8 @@ private:
    pcl::PointCloud<pcl::PointXYZI> _laserCloudOri;
    pcl::PointCloud<pcl::PointXYZI> _coeffSel;
 
-   std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> _laserCloudCornerArray;
-   std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> _laserCloudSurfArray;
+   std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> _laserCloudCornerArray; // used to generate _laserCloudSurround
+   std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> _laserCloudSurfArray; // used to generate _laserCloudSurround
    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> _laserCloudCornerDSArray;  ///< down sampled
    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> _laserCloudSurfDSArray;    ///< down sampled
 
@@ -185,6 +191,8 @@ private:
    std::vector<size_t> _laserCloudSurroundInd;
 
    Twist _transformSum, _transformIncre, _transformTobeMapped, _transformBefMapped, _transformAftMapped;
+
+   Twist _dwdx; // the original dwdx information
 
    CircularBuffer<IMUState2> _imuHistory;    ///< history of IMU states
 

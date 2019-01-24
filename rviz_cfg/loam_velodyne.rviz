@@ -145,14 +145,14 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 15
+      Max Intensity: 63
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 1
+      Size (Pixels): 2
       Size (m): 0.00999999978
       Style: Points
       Topic: /laser_cloud_surround
@@ -219,7 +219,7 @@ Visualization Manager:
       Size (Pixels): 2
       Size (m): 0.00999999978
       Style: Points
-      Topic: /velodyne_cloud_registered
+      Topic: /velodyne_cloud_2
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -369,7 +369,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 399.171692
+      Distance: 303.843109
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -384,10 +384,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: -0.884797156
+      Pitch: -0.569799185
       Target Frame: map
       Value: XYOrbit (rviz)
-      Yaw: 1.55539286
+      Yaw: 1.36539507
     Saved: ~
 Window Geometry:
   Displays:
