@@ -7,8 +7,8 @@
 
 #define LOG_ON
 #define DEBUG_ON
-#define SCAN_MATCHING_ON
-#define IMU_OFF
+#define SCAN_MATCHING_OFF
+#define IMU_ON
 
 const double  x_origin = 4447096.600000; // 單位：m
 const double y_origin = 424635.100000; // 單位：m

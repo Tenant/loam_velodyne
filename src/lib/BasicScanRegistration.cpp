@@ -2,6 +2,7 @@
 
 #include "loam_velodyne/BasicScanRegistration.h"
 #include "math_utils.h"
+#include "Configuration.h"
 
 namespace loam
 {
